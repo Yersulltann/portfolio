@@ -1,0 +1,182 @@
+/* ============================================================
+   MOTION — все анимации и hover-эффекты поверх основного дизайна.
+   Цвета только из токенов styles.css → работает в дневной и ночной теме.
+   Чтобы отключить движение — убери motion.css и motion.js из index.html.
+   При prefers-reduced-motion анимации выключаются автоматически.
+   ============================================================ */
+
+/* ---------- Lenis (плавный скролл) ---------- */
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-stopped{overflow:hidden}
+
+/* ---------- смена темы: круг от кнопки ---------- */
+.vt *,.vt *::before,.vt *::after{transition:none!important}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){z-index:2}
+.theme svg{transition:transform .6s var(--ease)}
+.theme:hover svg{transform:rotate(25deg) scale(1.1)}
+.theme .moon{animation:none}
+:root[data-theme] .theme svg{animation:pop-in .6s var(--ease)}
+@keyframes pop-in{from{transform:rotate(-120deg) scale(.4);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- полоска прогресса скролла ---------- */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:var(--acc);transform-origin:0 50%;transform:scaleX(var(--p,0));pointer-events:none}
+
+/* ---------- буквы (заголовок hero и большие заголовки) ---------- */
+.wd{display:inline-block;white-space:nowrap}
+.ch{display:inline-block;transition:transform .5s var(--ease),color .25s}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.h1 .ch:hover,.big .ch:hover{transform:translateY(-.08em) rotate(-6deg);color:var(--hl)}
+.h1 .serif .ch:hover,.big .serif .ch:hover{color:var(--fg)}
+
+/* большие заголовки Work / Experience / Skills: буквы выезжают по очереди,
+   а серифная буква делает оборот */
+.js .big.reveal{opacity:1;transform:none}
+.js .big .ch{opacity:0;transform:translateY(.7em) rotate(8deg);transition:transform .9s var(--ease),opacity .6s,color .25s;transition-delay:calc(var(--i) * 35ms)}
+.js .big.in .ch{opacity:1;transform:none}
+.js .big.in .serif .ch{animation:flip 1.1s var(--ease) .45s both}
+@keyframes flip{0%{rotate:y 0deg}60%{rotate:y 360deg}100%{rotate:y 360deg}}
+.js .big.settled .ch{transition-delay:0s}
+.js .big.settled .ch:hover{transform:translateY(-.08em) rotate(-6deg)}
+.big .serif .ch{transform-origin:50% 60%}
+
+/* ---------- навигация ---------- */
+.links a{position:relative}
+.links a::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;border-radius:2px;background:var(--hl);transform:scaleX(0);transform-origin:100% 50%;transition:transform .45s var(--ease)}
+.links a:hover::after,.links a.active::after{transform:scaleX(1);transform-origin:0 50%}
+.links a.active{opacity:1}
+.lang button{transition:background .3s var(--ease),color .3s,opacity .3s,transform .3s var(--ease)}
+.lang button:hover{opacity:1;transform:translateY(-1px)}
+.logo{display:inline-block;transition:transform .5s var(--ease)}
+.logo:hover{transform:rotate(-4deg) scale(1.04)}
+
+/* ---------- магнитные кнопки ---------- */
+.magnet{transition:translate .5s var(--ease),transform .25s var(--ease),background .2s,color .2s,border-color .2s}
+.magnet.pull{transition:translate .15s linear,transform .25s var(--ease),background .2s,color .2s,border-color .2s}
+.ghost{position:relative;overflow:hidden;isolation:isolate}
+.ghost::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--fg);transform:translateY(101%);transition:transform .5s var(--ease)}
+.ghost:hover{background:transparent}
+.ghost:hover::before{transform:none}
+.ghost.dark::before{background:var(--on-pop)}
+.ghost.dark:hover{background:transparent}
+.copy{transition:transform .3s var(--ease),background .2s,color .2s}
+.copy:hover{transform:scale(1.06) rotate(-2deg)}
+.copy.done{background:var(--acc2);color:var(--on-acc2)}
+
+/* ---------- фигура в hero: параллакс от курсора (--mx/--my) и скролла (--sy) ---------- */
+.figure .disc{translate:calc(var(--mx,0) * -18px) calc(var(--my,0) * -14px + var(--sy,0) * 60px);transition:transform 1.1s var(--ease) .15s,opacity .6s .15s,background .5s,translate .9s var(--ease)}
+.figure .person{translate:calc(var(--mx,0) * 14px) calc(var(--my,0) * 8px + var(--sy,0) * -30px);transition:transform 1.1s var(--ease) .3s,opacity .7s .3s,translate .9s var(--ease)}
+.sticker{translate:calc(var(--mx,0) * 34px) calc(var(--my,0) * 24px + var(--sy,0) * -120px);transition:translate 1s var(--ease),scale .4s var(--ease)}
+.sticker.s2{translate:calc(var(--mx,0) * -30px) calc(var(--my,0) * -20px + var(--sy,0) * -70px)}
+.figure.in .disc{animation:breathe 7s ease-in-out 1.4s infinite}
+@keyframes breathe{0%,100%{scale:1}50%{scale:1.035}}
+.sticker:hover{scale:1.08;cursor:default}
+/* на телефоне стикеры не уезжают при скролле — иначе наезжают на кнопки над фигурой */
+@media(max-width:860px){.sticker,.sticker.s2{translate:none}}
+
+/* ---------- видео: раскрывается при скролле, как у Apple ---------- */
+.reel{clip-path:inset(calc(var(--clip,0) * 7%) calc(var(--clip,0) * 9%) round 28px)}
+.reel .ph,.reel video{scale:calc(1 + var(--clip,0) * .18)}
+@media(max-width:700px){.reel{clip-path:inset(calc(var(--clip,0) * 4%) round 22px)}}
+
+/* ---------- цифры: линия прорисовывается ---------- */
+.stats div{position:relative;border-top-color:transparent}
+.stats div::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:var(--fg);opacity:.25;transform:scaleX(0);transform-origin:0 50%;transition:transform 1.2s var(--ease) .2s}
+.stats div.in::before,html:not(.js) .stats div::before{transform:none}
+.stats b{transition:transform .5s var(--ease),color .3s}
+.stats div:hover b{transform:translateX(8px);color:var(--hl)}
+
+/* ---------- бегущие строки ---------- */
+.band{transform:skewY(calc(var(--skew,0) * 1deg));transition:transform .4s var(--ease),background .5s}
+
+/* ---------- карточки проектов: маска картинки, 3D-наклон, блик ---------- */
+.card>a,.card>.nolink{position:relative;transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--lift,0px));transition:transform .6s var(--ease),box-shadow .4s,background .5s;will-change:transform}
+.card>a:hover,.card>.nolink:hover{--lift:-8px;transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--lift));box-shadow:0 30px 60px var(--shadow)}
+.card.tilting>a,.card.tilting>.nolink{transition:transform .12s linear,box-shadow .4s,background .5s}
+.card>a::after,.card>.nolink::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;background:radial-gradient(420px circle at var(--gx,50%) var(--gy,50%),color-mix(in srgb,var(--on-acc) 20%,transparent),transparent 45%);mix-blend-mode:soft-light;opacity:0;transition:opacity .4s}
+.card>a:hover::after,.card>.nolink:hover::after{opacity:1}
+.card .img b{transition:transform .5s var(--ease)}
+.card>a:hover .img b{transform:translateY(-2px) rotate(-3deg)}
+.card .go{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;position:relative}
+.card .go::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:2px;background:currentColor;transform:scaleX(0);transform-origin:0 50%;transition:transform .45s var(--ease)}
+.card>a:hover .go::after{transform:scaleX(1)}
+
+/* курсор-пузырь «View ↗» над карточками */
+.cursor{position:fixed;left:0;top:0;z-index:70;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;display:grid;place-items:center;text-align:center;padding:10px;background:var(--acc2);color:var(--on-acc2);font:600 14px/1.15 "Inter Tight",system-ui,sans-serif;letter-spacing:0;pointer-events:none;box-shadow:0 14px 40px var(--shadow);transform:translate3d(var(--cx,-200px),var(--cy,-200px),0) scale(0);transition:transform .35s var(--ease)}
+.cursor.on{transform:translate3d(var(--cx),var(--cy),0) scale(1)}
+.cursor.muted{background:var(--surface);color:var(--fg)}
+
+/* ---------- About: полароиды падают с поворотом, факты по одному ---------- */
+.ab-main{translate:0 calc(var(--sp,0) * -30px)}
+.ab-polar.p1{translate:0 calc(var(--sp,0) * -70px)}
+.ab-polar.p2{translate:0 calc(var(--sp,0) * -110px)}
+.js .ab-visual .ab-polar{opacity:0}
+.js .ab-visual.in .ab-polar{animation:drop 1.1s var(--ease) .35s both}
+.js .ab-visual.in .ab-polar.p2{animation-delay:.55s}
+@keyframes drop{from{opacity:0;rotate:-28deg;scale:1.25}to{opacity:1;rotate:0deg;scale:1}}
+.js .ab-visual.in .ab-polar.p2{animation-name:drop2}
+@keyframes drop2{from{opacity:0;rotate:30deg;scale:1.25}to{opacity:1;rotate:0deg;scale:1}}
+.ab-tag{animation:bob 5s ease-in-out infinite;--r:5deg}
+.js .facts div{opacity:0;transform:translateY(14px);transition:opacity .6s,transform .7s var(--ease),padding .4s var(--ease)}
+.js .facts.in div{opacity:1;transform:none}
+.facts.in div:nth-child(2){transition-delay:.08s}.facts.in div:nth-child(3){transition-delay:.16s}
+.facts.in div:nth-child(4){transition-delay:.24s}.facts.in div:nth-child(5){transition-delay:.32s}.facts.in div:nth-child(6){transition-delay:.4s}
+.facts div{position:relative}
+.facts div:hover{padding-left:10px;transition-delay:0s}
+.facts div::before{content:"";position:absolute;left:0;top:-1px;height:1px;width:100%;background:var(--hl);transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease)}
+.facts div:hover::before{transform:scaleX(1)}
+
+/* ---------- Experience: линия рисуется, текст по очереди, заливка при наведении ---------- */
+.rows{border-top-color:transparent;position:relative}
+.rows::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:var(--line);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.2s var(--ease)}
+.rows:has(.row.in)::before{transform:none}
+.row{position:relative;isolation:isolate;border-bottom-color:transparent;transition:padding .5s var(--ease)}
+.row::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--line);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.2s var(--ease) .2s}
+.row.in::after,html:not(.js) .row::after{transform:none}
+.js .row>*{opacity:0;transform:translateY(16px);transition:opacity .6s,transform .8s var(--ease),color .3s}
+.js .row.in>*{opacity:1;transform:none}
+.row.in>:nth-child(2){transition-delay:.1s,.1s,0s}
+.row.in>:nth-child(3){transition-delay:.2s,.2s,0s}
+.js .row.reveal{opacity:1;transform:none}
+.row::before{content:"";position:absolute;inset:0 calc(var(--gut) * -1);z-index:-1;background:var(--acc);transform:scaleY(0);transform-origin:50% 100%;transition:transform .55s var(--ease)}
+.row:hover{padding-left:14px;padding-right:14px}
+.row:hover::before{transform:none}
+.row:hover,.row:hover .role,.row:hover p,.row:hover h3 span{color:var(--on-acc)}
+.row:hover .date{color:var(--acc2)}
+.row .role,.row p,.row h3 span,.row .date{transition:color .3s}
+
+/* ---------- Skills ---------- */
+.sk{transition:transform .5s var(--ease),border-color .3s,background .5s}
+.sk:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--fg) 30%,transparent)}
+.chips li{transition:transform .4s var(--ease),background .25s,color .25s,border-color .25s,opacity .5s}
+.chips li:hover,.chips.hot li:hover,.chips.alt li:hover{transform:translateY(-3px) rotate(-3deg);background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.js .sk .chips li{opacity:0;transform:scale(.7) translateY(10px)}
+.js .sk.in .chips li{opacity:1;transform:none;transition-delay:calc(.15s + var(--i,0) * 45ms)}
+.js .sk.in .chips li:hover{transform:translateY(-3px) rotate(-3deg);transition-delay:0s}
+.list li{transition:padding .4s var(--ease),color .3s}
+.list li:hover{padding-left:10px;color:var(--hl)}
+.edu-row{transition:padding .4s var(--ease)}
+.edu-row:hover{padding-left:10px}
+
+/* ---------- Contact ---------- */
+.mail a{background:linear-gradient(var(--on-pop),var(--on-pop)) 0 100%/0 100% no-repeat;transition:background-size .5s var(--ease),color .3s;padding:0 4px}
+.mail a:hover{background-size:100% 100%;color:var(--pop)}
+.socials a{position:relative;isolation:isolate}
+.socials a::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--on-pop);transform:scaleY(0);transform-origin:50% 100%;transition:transform .45s var(--ease)}
+.socials a:hover{background:transparent;color:var(--pop)}
+.socials a:hover::before{transform:none}
+.socials a:hover i{transform:rotate(45deg) scale(1.2)}
+.foot a{transition:color .2s}
+.foot a:hover{color:var(--pop-hl)}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  .js .big .ch,.js .sk .chips li,.js .facts div,.js .row>*,.js .ab-visual .ab-polar{opacity:1!important;transform:none!important;animation:none!important}
+  .rows::before,.row::after,.stats div::before{transform:none!important}
+  .reel{clip-path:none}
+  .reel .ph,.reel video{scale:1}
+  .card>a,.card>.nolink{transform:none!important}
+  .cursor,.progress{display:none}
+  .figure .disc,.figure .person,.sticker,.ab-main,.ab-polar{translate:none!important}
+}

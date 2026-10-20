@@ -1,13 +1,28 @@
 /* ============================================================
-   АНАЛИТИКА — Microsoft Clarity (бесплатно): посетители, источники,
-   страны, устройства, карты кликов и прокрутки, записи сессий.
-   Включается только после согласия посетителя (GDPR) — плашка внизу.
-   Чтобы включить: вставь ID проекта Clarity в CLARITY_ID ниже.
+   АНАЛИТИКА, два сервиса (оба бесплатные):
+   1) GoatCounter — простой счётчик БЕЗ cookie: считает ВСЕХ посетителей
+      (сколько, откуда, страны, устройства, нажатия). Согласие не нужно.
+   2) Microsoft Clarity — карты кликов и прокрутки, записи сессий.
+      Только после согласия посетителя (GDPR) — плашка внизу.
+   Пустой код/ID = сервис выключен.
    ============================================================ */
 (function () {
+  const GOAT_CODE = 'yersultan';            // ← код сайта из goatcounter.com (часть адреса до .goatcounter.com)
   const CLARITY_ID = 'z0vnsl2e74'; // ← ID проекта из clarity.microsoft.com (Settings → Overview → Project ID)
 
-  if (!CLARITY_ID) return;
+  /* ---------- GoatCounter: без cookie, сразу для всех ---------- */
+  if (GOAT_CODE) {
+    const g = document.createElement('script');
+    g.async = true;
+    g.src = 'https://gc.zgo.at/count.js';
+    g.dataset.goatcounter = 'https://' + GOAT_CODE + '.goatcounter.com/count';
+    document.head.appendChild(g);
+  }
+  const goat = (name) => {
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+      window.goatcounter.count({ path: name, title: name, event: true });
+    }
+  };
 
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const KEY = 'analytics-consent';
@@ -40,7 +55,7 @@
     tag('theme', document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
   }
   const on = () => loaded && typeof window.clarity === 'function';
-  const track = (name) => { if (on()) window.clarity('event', name); };
+  const track = (name) => { goat(name); if (on()) window.clarity('event', name); };
   function tag(k, v) { if (on()) window.clarity('set', k, String(v)); }
 
   /* ---------- плашка согласия ---------- */
@@ -84,16 +99,18 @@
   new MutationObserver(() => { fill(); tag('lang', document.documentElement.lang); if (document.documentElement.dataset.theme) tag('theme', document.documentElement.dataset.theme); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'data-theme'] });
 
-  // ссылка «Настройки cookie» в подвале — можно передумать
-  $$('[data-cookie-settings]').forEach((b) => {
-    b.hidden = false;
-    b.addEventListener('click', () => { store.clear(); showBanner(); });
-  });
-  fill();
+  if (CLARITY_ID) {
+    // ссылка «Настройки cookie» в подвале — можно передумать
+    $$('[data-cookie-settings]').forEach((b) => {
+      b.hidden = false;
+      b.addEventListener('click', () => { store.clear(); showBanner(); });
+    });
+    fill();
 
-  const choice = store.get();
-  if (choice === 'yes') loadClarity();
-  else if (choice !== 'no') setTimeout(showBanner, 1200);
+    const choice = store.get();
+    if (choice === 'yes') loadClarity();
+    else if (choice !== 'no') setTimeout(showBanner, 1200);
+  }
 
   /* ---------- события: что нажимали ---------- */
   const slug = (s) => (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');

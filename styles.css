@@ -313,3 +313,15 @@ ul,ol{list-style:none}
 
 /* hero: фото чуть ниже края блока — над головой остаётся место для стикера «Figma · Illustrator · Photoshop» */
 .figure .person{height:90%}
+
+/* ---------- плашка согласия на аналитику (analytics.js) ---------- */
+.consent{position:fixed;left:16px;bottom:16px;z-index:80;max-width:380px;padding:18px;border-radius:18px;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 20px 50px var(--shadow);font-size:14px;line-height:1.5;opacity:0;transform:translateY(16px);transition:opacity .4s,transform .4s var(--ease)}
+.consent.in{opacity:1;transform:none}
+.consent p{color:var(--mute)}
+.consent-b{display:flex;gap:8px;margin-top:14px}
+.consent-b button{flex:1;min-height:44px;padding:0 16px;border-radius:999px;font-weight:600;font-size:14px;border:1px solid var(--line)}
+.consent-b [data-c="yes"]{background:var(--acc);color:var(--on-acc);border-color:var(--acc)}
+.consent-b [data-c="no"]:hover{border-color:var(--fg)}
+@media(max-width:480px){.consent{left:12px;right:12px;bottom:12px;max-width:none}}
+.cookie-link{font-size:14px;font-weight:500;text-decoration:underline;text-underline-offset:3px;opacity:.8}
+.cookie-link:hover{opacity:1}

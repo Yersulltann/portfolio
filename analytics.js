@@ -25,6 +25,7 @@
   };
 
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const KEY = 'analytics-consent';
   const store = {
     get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
@@ -33,10 +34,10 @@
   };
 
   const TEXT = {
-    en: { msg: 'I use Microsoft Clarity to see how visitors use this site (clicks, scrolling) and make it better. No ads, no data sold.', yes: 'Accept', no: 'Decline', settings: 'Cookie settings' },
-    ru: { msg: 'Я использую Microsoft Clarity, чтобы видеть, как посетители пользуются сайтом (клики, прокрутка), и делать его лучше. Без рекламы, данные никому не продаются.', yes: 'Разрешить', no: 'Отклонить', settings: 'Настройки cookie' },
-    kk: { msg: 'Сайтты жақсарту үшін Microsoft Clarity арқылы келушілердің оны қалай қолданатынын (басулар, айналдыру) көремін. Жарнама жоқ, деректер сатылмайды.', yes: 'Рұқсат беру', no: 'Бас тарту', settings: 'Cookie баптаулары' },
-    pl: { msg: 'Korzystam z Microsoft Clarity, aby widzieć, jak odwiedzający korzystają ze strony (kliknięcia, przewijanie), i ją ulepszać. Bez reklam, dane nie są sprzedawane.', yes: 'Akceptuję', no: 'Odrzucam', settings: 'Ustawienia cookies' }
+    en: { title: 'Can I have a cookie?', msg: 'Just one — so Microsoft Clarity can show me which projects you liked and how far you scrolled. No ads, nothing sold.', yes: 'Sure, take one', no: 'Nope, mine', thanks: 'Yum, thank you!', bye: 'Fair enough — keeping my hands off.', settings: '🍪 Cookie settings' },
+    ru: { title: 'Можно печеньку?', msg: 'Всего одну — чтобы Microsoft Clarity показал мне, какие проекты понравились и докуда вы долистали. Без рекламы, ничего не продаю.', yes: 'Угощайся', no: 'Не, моё', thanks: 'Ням, спасибо!', bye: 'Понял, не трогаю.', settings: '🍪 Настройки cookie' },
+    kk: { title: 'Бір печенье бересіз бе?', msg: 'Біреу ғана — Microsoft Clarity маған қай жобалар ұнағанын және сайтты қай жерге дейін айналдырғаныңызды көрсетуі үшін. Жарнама жоқ, ештеңе сатылмайды.', yes: 'Әрине, ал', no: 'Жоқ, менікі', thanks: 'Дәмді екен, рахмет!', bye: 'Түсіндім, тимеймін.', settings: '🍪 Cookie баптаулары' },
+    pl: { title: 'Mogę ciasteczko?', msg: 'Tylko jedno — żeby Microsoft Clarity pokazał mi, które projekty się spodobały i dokąd udało się przewinąć. Bez reklam, nic nie sprzedaję.', yes: 'Jasne, częstuj się', no: 'Nie, moje', thanks: 'Mniam, dzięki!', bye: 'Jasne, nie ruszam.', settings: '🍪 Ustawienia cookies' }
   };
   const t = () => TEXT[document.documentElement.lang] || TEXT.en;
 
@@ -58,37 +59,68 @@
   const track = (name) => { goat(name); if (on()) window.clarity('event', name); };
   function tag(k, v) { if (on()) window.clarity('set', k, String(v)); }
 
-  /* ---------- плашка согласия ---------- */
+  /* ---------- плашка согласия: «можно печеньку?» ----------
+     «Угощайся» — печенье надкусывают, сыплются крошки; «Не, моё» — оно укатывается. */
+  const COOKIE_SVG =
+    '<svg class="ck" viewBox="0 0 64 64" aria-hidden="true">' +
+      '<defs><mask id="ck-bites">' +
+        '<rect width="64" height="64" fill="#fff"/>' +
+        '<circle class="bite b1" cx="58" cy="12" r="11" fill="#000"/>' +
+        '<circle class="bite b2" cx="62" cy="32" r="9" fill="#000"/>' +
+        '<circle class="bite b3" cx="44" cy="2" r="10" fill="#000"/>' +
+      '</mask></defs>' +
+      '<g mask="url(#ck-bites)">' +
+        '<circle cx="32" cy="32" r="28" class="ck-dough"/>' +
+        '<circle cx="32" cy="32" r="28" class="ck-edge"/>' +
+        '<circle cx="22" cy="22" r="3.6" class="ck-chip"/><circle cx="38" cy="18" r="2.8" class="ck-chip"/>' +
+        '<circle cx="44" cy="34" r="3.4" class="ck-chip"/><circle cx="26" cy="40" r="3" class="ck-chip"/>' +
+        '<circle cx="36" cy="46" r="2.4" class="ck-chip"/><circle cx="16" cy="34" r="2.2" class="ck-chip"/>' +
+      '</g>' +
+    '</svg>';
+
   let banner = null;
   function showBanner() {
     if (banner) return;
     banner = document.createElement('div');
     banner.className = 'consent';
     banner.setAttribute('role', 'dialog');
-    banner.setAttribute('aria-live', 'polite');
-    banner.innerHTML = '<p></p><div class="consent-b"><button type="button" data-c="no"></button><button type="button" data-c="yes"></button></div>';
+    banner.setAttribute('aria-labelledby', 'consent-title');
+    banner.innerHTML =
+      '<div class="ck-wrap">' + COOKIE_SVG + '<span class="crumbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>' +
+      '<div class="consent-txt"><b id="consent-title"></b><p></p>' +
+      '<span class="consent-done" aria-live="polite"></span>' +
+      '<div class="consent-b"><button type="button" data-c="no"></button><button type="button" data-c="yes"></button></div></div>';
     fill();
+    const yesBtn = banner.querySelector('[data-c="yes"]');
+    // печенька тянется к кнопке «Угощайся»
+    yesBtn.addEventListener('pointerenter', () => banner && banner.classList.add('tempt'));
+    yesBtn.addEventListener('pointerleave', () => banner && banner.classList.remove('tempt'));
     banner.addEventListener('click', (e) => {
       const b = e.target.closest('[data-c]');
-      if (!b) return;
+      if (!b || !banner) return;
       const yes = b.dataset.c === 'yes';
       store.set(yes ? 'yes' : 'no');
-      hideBanner();
+      goat(yes ? 'cookie_yes' : 'cookie_no');
+      const x = t();
+      banner.querySelector('.consent-done').textContent = yes ? x.thanks : x.bye;
+      banner.classList.add(yes ? 'eaten' : 'rolled');
       if (yes) loadClarity();
       else if (loaded) window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
+      setTimeout(hideBanner, reduce ? 900 : 1700);
     });
     document.body.appendChild(banner);
-    requestAnimationFrame(() => banner.classList.add('in'));
+    requestAnimationFrame(() => requestAnimationFrame(() => banner && banner.classList.add('in')));
   }
   function hideBanner() {
     if (!banner) return;
     const b = banner; banner = null;
     b.classList.remove('in');
-    setTimeout(() => b.remove(), 400);
+    setTimeout(() => b.remove(), 500);
   }
   function fill() {
     const x = t();
     if (banner) {
+      banner.querySelector('b').textContent = x.title;
       banner.querySelector('p').textContent = x.msg;
       banner.querySelector('[data-c="yes"]').textContent = x.yes;
       banner.querySelector('[data-c="no"]').textContent = x.no;

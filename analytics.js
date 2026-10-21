@@ -34,10 +34,10 @@
   };
 
   const TEXT = {
-    en: { title: 'Can I have a cookie?', msg: 'Just one — so Microsoft Clarity can show me which projects you liked and how far you scrolled. No ads, nothing sold.', yes: 'Sure, take one', no: 'Nope, mine', thanks: 'Yum, thank you!', bye: 'Fair enough — keeping my hands off.', settings: '🍪 Cookie settings' },
-    ru: { title: 'Можно печеньку?', msg: 'Всего одну — чтобы Microsoft Clarity показал мне, какие проекты понравились и докуда вы долистали. Без рекламы, ничего не продаю.', yes: 'Угощайся', no: 'Не, моё', thanks: 'Ням, спасибо!', bye: 'Понял, не трогаю.', settings: '🍪 Настройки cookie' },
-    kk: { title: 'Бір печенье бересіз бе?', msg: 'Біреу ғана — Microsoft Clarity маған қай жобалар ұнағанын және сайтты қай жерге дейін айналдырғаныңызды көрсетуі үшін. Жарнама жоқ, ештеңе сатылмайды.', yes: 'Әрине, ал', no: 'Жоқ, менікі', thanks: 'Дәмді екен, рахмет!', bye: 'Түсіндім, тимеймін.', settings: '🍪 Cookie баптаулары' },
-    pl: { title: 'Mogę ciasteczko?', msg: 'Tylko jedno — żeby Microsoft Clarity pokazał mi, które projekty się spodobały i dokąd udało się przewinąć. Bez reklam, nic nie sprzedaję.', yes: 'Jasne, częstuj się', no: 'Nie, moje', thanks: 'Mniam, dzięki!', bye: 'Jasne, nie ruszam.', settings: '🍪 Ustawienia cookies' }
+    en: { title: 'Psst… can I have a cookie?', msg: 'Just an analytical (yummy) one — so Microsoft Clarity can show me which projects you liked and how far you scrolled. No ads, nothing sold.', yes: 'OK!', no: 'Nope, mine', thanks: 'Nom nom — thank you!', bye: 'Fair enough, hiding it.', settings: '🍪 Cookie settings' },
+    ru: { title: 'Пс-с… можно печеньку?', msg: 'Аналитическую (вкусную) — чтобы Microsoft Clarity показал мне, какие проекты понравились и докуда вы долистали. Без рекламы, ничего не продаю.', yes: 'Угощайся!', no: 'Не, моё', thanks: 'Ням-ням, спасибо!', bye: 'Понял, прячу обратно.', settings: '🍪 Настройки cookie' },
+    kk: { title: 'Пс-с… печенье бересіз бе?', msg: 'Аналитикалық (дәмді) біреуін — Microsoft Clarity маған қай жобалар ұнағанын және қай жерге дейін айналдырғаныңызды көрсетуі үшін. Жарнама жоқ, ештеңе сатылмайды.', yes: 'Әрине!', no: 'Жоқ, менікі', thanks: 'Мм, дәмді, рахмет!', bye: 'Түсіндім, жасырамын.', settings: '🍪 Cookie баптаулары' },
+    pl: { title: 'Psst… mogę ciasteczko?', msg: 'Analityczne (pyszne) — żeby Microsoft Clarity pokazał mi, które projekty się spodobały i dokąd udało się przewinąć. Bez reklam, nic nie sprzedaję.', yes: 'Częstuj!', no: 'Nie, moje', thanks: 'Mniam, dzięki!', bye: 'Jasne, chowam.', settings: '🍪 Ustawienia cookies' }
   };
   const t = () => TEXT[document.documentElement.lang] || TEXT.en;
 
@@ -59,26 +59,51 @@
   const track = (name) => { goat(name); if (on()) window.clarity('event', name); };
   function tag(k, v) { if (on()) window.clarity('set', k, String(v)); }
 
-  /* ---------- плашка согласия: «можно печеньку?» ----------
-     «Угощайся» — печенье надкусывают, сыплются крошки; «Не, моё» — оно укатывается. */
-  const COOKIE_SVG =
-    '<svg class="ck" viewBox="0 0 64 64" aria-hidden="true">' +
-      '<defs><mask id="ck-bites">' +
-        '<rect width="64" height="64" fill="#fff"/>' +
-        '<circle class="bite b1" cx="58" cy="12" r="11" fill="#000"/>' +
-        '<circle class="bite b2" cx="62" cy="32" r="9" fill="#000"/>' +
-        '<circle class="bite b3" cx="44" cy="2" r="10" fill="#000"/>' +
+  /* ---------- плашка согласия: кот с печенькой на мятом листке ----------
+     Кот выглядывает из-за листка и держит печеньку. «OK!» — кот её откусывает,
+     «Не, моё» — кот прячется, листок комкается и улетает. Глаза следят за курсором. */
+  // задний слой: голова и уши (прячутся за листком)
+  const CAT_BACK =
+    '<svg class="cat cat-back" viewBox="0 0 170 130" aria-hidden="true">' +
+      '<g class="cat-head">' +
+        '<path class="ink fur" d="M38 70 L44 26 L72 52 Z"/><path class="ink fur" d="M98 52 L126 26 L132 70 Z"/>' +
+        '<path class="ear-in" d="M46 40 L50 58 M124 40 L120 58"/>' +
+        '<path class="ink fur" d="M85 46 C122 46 138 70 136 98 C134 124 112 136 85 136 C58 136 36 124 34 98 C32 70 48 46 85 46 Z"/>' +
+        '<g class="eyes">' +
+          '<circle class="ink eye" cx="67" cy="82" r="11.5"/><circle class="ink eye" cx="103" cy="82" r="11.5"/>' +
+          '<g class="pupils"><circle cx="67" cy="83" r="5.6"/><circle cx="103" cy="83" r="5.6"/></g>' +
+          '<path class="happy" d="M57 85 Q67 74 77 85 M93 85 Q103 74 113 85"/>' +
+          '<path class="lid" d="M55.5 82 H78.5 M91.5 82 H114.5"/>' +
+        '</g>' +
+        '<ellipse class="blush" cx="54" cy="98" rx="7" ry="4"/><ellipse class="blush" cx="116" cy="98" rx="7" ry="4"/>' +
+        '<path class="nose" d="M81 95 H89 L85 100 Z"/>' +
+        '<path class="mouth" d="M78 103 Q81.5 107 85 103 Q88.5 107 92 103"/>' +
+        '<path class="whisk" d="M44 96 L24 92 M44 102 L22 104 M126 96 L146 92 M126 102 L148 104"/>' +
+      '</g>' +
+    '</svg>';
+  // передний слой: лапы и печенька (поверх края листка)
+  const CAT_FRONT =
+    '<svg class="cat cat-front" viewBox="0 0 170 130" aria-hidden="true">' +
+      '<defs><mask id="ck-bites"><rect x="0" y="0" width="170" height="130" fill="#fff"/>' +
+        '<circle class="bite b1" cx="112" cy="94" r="8" fill="#000"/>' +
+        '<circle class="bite b2" cx="118" cy="104" r="7" fill="#000"/>' +
+        '<circle class="bite b3" cx="124" cy="92" r="7" fill="#000"/>' +
       '</mask></defs>' +
-      '<g mask="url(#ck-bites)">' +
-        '<circle cx="32" cy="32" r="28" class="ck-dough"/>' +
-        '<circle cx="32" cy="32" r="28" class="ck-edge"/>' +
-        '<circle cx="22" cy="22" r="3.6" class="ck-chip"/><circle cx="38" cy="18" r="2.8" class="ck-chip"/>' +
-        '<circle cx="44" cy="34" r="3.4" class="ck-chip"/><circle cx="26" cy="40" r="3" class="ck-chip"/>' +
-        '<circle cx="36" cy="46" r="2.4" class="ck-chip"/><circle cx="16" cy="34" r="2.2" class="ck-chip"/>' +
+      '<g class="cookie" mask="url(#ck-bites)">' +
+        '<circle class="ink dough" cx="128" cy="106" r="19"/>' +
+        '<circle class="chip" cx="121" cy="100" r="2.6"/><circle class="chip" cx="133" cy="98" r="2.2"/>' +
+        '<circle class="chip" cx="136" cy="110" r="2.6"/><circle class="chip" cx="124" cy="113" r="2.2"/><circle class="chip" cx="129" cy="106" r="1.8"/>' +
+      '</g>' +
+      '<g class="paws">' +
+        '<path class="ink fur" d="M50 126 V112 C50 105 54 102 60 102 C66 102 70 105 70 112 V126"/>' +
+        '<path class="toe" d="M57 104 V110 M63 104 V110"/>' +
+        '<path class="ink fur paw-r" d="M108 126 V114 C108 107 112 104 118 104 C124 104 128 107 128 114 V126"/>' +
+        '<path class="toe" d="M115 106 V112 M121 106 V112"/>' +
       '</g>' +
     '</svg>';
 
   let banner = null;
+  let stopEyes = null;
   function showBanner() {
     if (banner) return;
     banner = document.createElement('div');
@@ -86,15 +111,25 @@
     banner.setAttribute('role', 'dialog');
     banner.setAttribute('aria-labelledby', 'consent-title');
     banner.innerHTML =
-      '<div class="ck-wrap">' + COOKIE_SVG + '<span class="crumbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>' +
-      '<div class="consent-txt"><b id="consent-title"></b><p></p>' +
-      '<span class="consent-done" aria-live="polite"></span>' +
-      '<div class="consent-b"><button type="button" data-c="no"></button><button type="button" data-c="yes"></button></div></div>';
+      CAT_BACK +
+      '<div class="paper">' +
+        '<span class="ck-tag" aria-hidden="true">COOOOOOKIES ↘</span>' +
+        '<b id="consent-title"></b><p></p>' +
+        '<span class="consent-done" aria-live="polite"></span>' +
+        '<div class="consent-b"><button type="button" data-c="no"></button><button type="button" data-c="yes"></button></div>' +
+      '</div>' +
+      CAT_FRONT +
+      '<span class="crumbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>';
     fill();
+
     const yesBtn = banner.querySelector('[data-c="yes"]');
-    // печенька тянется к кнопке «Угощайся»
-    yesBtn.addEventListener('pointerenter', () => banner && banner.classList.add('tempt'));
-    yesBtn.addEventListener('pointerleave', () => banner && banner.classList.remove('tempt'));
+    const noBtn = banner.querySelector('[data-c="no"]');
+    const mood = (m) => () => banner && (banner.dataset.mood = m);
+    yesBtn.addEventListener('pointerenter', mood('want'));
+    noBtn.addEventListener('pointerenter', mood('worry'));
+    [yesBtn, noBtn].forEach((b) => b.addEventListener('pointerleave', mood('')));
+    stopEyes = followEyes(banner);
+
     banner.addEventListener('click', (e) => {
       const b = e.target.closest('[data-c]');
       if (!b || !banner) return;
@@ -103,19 +138,40 @@
       goat(yes ? 'cookie_yes' : 'cookie_no');
       const x = t();
       banner.querySelector('.consent-done').textContent = yes ? x.thanks : x.bye;
+      banner.dataset.mood = '';
       banner.classList.add(yes ? 'eaten' : 'rolled');
       if (yes) loadClarity();
       else if (loaded) window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
-      setTimeout(hideBanner, reduce ? 900 : 1700);
+      setTimeout(hideBanner, reduce ? 900 : yes ? 2100 : 1500);
     });
     document.body.appendChild(banner);
     requestAnimationFrame(() => requestAnimationFrame(() => banner && banner.classList.add('in')));
   }
+
+  // зрачки смотрят на курсор (только мышь, без reduced-motion)
+  function followEyes(root) {
+    if (reduce || !matchMedia('(hover: hover) and (pointer: fine)').matches) return null;
+    const pupils = root.querySelector('.pupils');
+    const svg = root.querySelector('.cat-back');
+    const move = (e) => {
+      const r = svg.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height * 0.63;
+      const dx = e.clientX - cx, dy = e.clientY - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const k = Math.min(1, d / 120) * 4;
+      pupils.setAttribute('transform', `translate(${(dx / d * k).toFixed(2)} ${(dy / d * k).toFixed(2)})`);
+    };
+    window.addEventListener('pointermove', move, { passive: true });
+    return () => window.removeEventListener('pointermove', move);
+  }
+
   function hideBanner() {
     if (!banner) return;
     const b = banner; banner = null;
+    if (stopEyes) { stopEyes(); stopEyes = null; }
+    b.classList.add('out');
     b.classList.remove('in');
-    setTimeout(() => b.remove(), 500);
+    setTimeout(() => b.remove(), 700);
   }
   function fill() {
     const x = t();
